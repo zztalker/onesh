@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 alias onesh='one-vm-list.py ssh'
+alias onesync='one-vm-list.py rsync'
 
 _onesh_completions()
 {
@@ -8,3 +9,4 @@ _onesh_completions()
 }
 
 complete -F _onesh_completions onesh
+complete -F _onesh_completions onesync

@@ -57,3 +57,6 @@ if args.command[0] == 'listvms':
         print(k)
 elif args.command[0] == 'ssh':
     subprocess.call(['ssh', 'root@{}'.format(vms[args.command[1]])])
+elif args.command[0] == 'rsync':
+    subprocess.call(['rsync', '-av', '.', 'root@{}:{}'.format(
+        vms[args.command[1]], args.command[2])])
