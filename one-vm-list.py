@@ -14,14 +14,18 @@ ONE_DIR = '~/.one'
 ONE_AUTH = 'one_auth'
 ONE_ENDPOINT = 'endpoint'
 ONE_CACHE = 'cache'
-CACHE_TIME = 30 # in seconds
+CACHE_TIME = 30  # in seconds
 
 
 def create_one_dir():
     os.makedirs(ONE_DIR, exist_ok=True)
 
 
-def get_one_auth_data() -> None:
+def get_one_auth_data():
+    """
+    Return (username, password, endpoint) tuple.
+    """
+
     try:
         with open(os.path.expanduser(ONE_DIR + '/' + ONE_AUTH)) as f:
             one_user, one_password = f.readline().strip().split(":", 1)
@@ -48,6 +52,7 @@ def get_cache():
     """
     Return cache vm data or None.
     """
+
     path_cache = ONE_DIR + '/' + ONE_CACHE
     if os.path.exists(path_cache):
         with open(path_cache) as f:
@@ -99,17 +104,40 @@ def run_command(one_vms) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'command', nargs='*',
-        help='listvms - show list of VMs, ssh - connect to vm')
+        help='''
+    listvms - show list of VMs,
+    ssh vm - connect to vm,
+    scp vm file [/path/to/file/on/vm] - scp file to vm if path/to not set used same,
+    rsync vm /path/on/vm - rsync current folder to vm,
+    ping vm
+    ''')  # noqa
 
     args = parser.parse_args()
     if args.command[0] == 'listvms':
-        for k in one_vms.keys():
-            print(k)
+        for k, v in one_vms.items():
+            print(k, v)
     elif args.command[0] == 'ssh':
         subprocess.call(['ssh', 'root@{}'.format(one_vms[args.command[1]])])
+    elif args.command[0] == 'ping':
+        try:
+            subprocess.call(['ping', one_vms[args.command[1]]])
+        except KeyboardInterrupt:
+            pass
+    elif args.command[0] == 'scp':
+        vm_name = args.command[1]
+        path_to_file = args.command[2]
+        try:
+            path_on_remote = args.command[3]
+        except IndexError:
+            path_on_remote = path_to_file
+        subprocess.call([
+            'scp', path_to_file,
+            'root@{}:{}'.format(one_vms[vm_name], path_on_remote)])
     elif args.command[0] == 'rsync':
-        subprocess.call(['rsync', '-av', '.', 'root@{}:{}'.format(
-            one_vms[args.command[1]], args.command[2])])
+        subprocess.call([
+            'rsync', '-av', '--chown=root:root', '.',
+            'root@{}:{}'.format(one_vms[args.command[1]], args.command[2])
+        ])
 
 
 def main():

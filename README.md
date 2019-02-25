@@ -23,13 +23,28 @@ OpenNebula shell extender
 
     Get list of VMS:
 
-        onesh <TAB><TAB>
+        onels
 
     SSH to vm cloud-1:
 
         onesh c<TAB><ENTER>
 
+    RSYNC current folder to cloud-1:
+
+        onesync c<TAB> \remote
+
+    PING cloud-1:
+
+        oneping c<TAB><ENTER>
+
+    SCP file to same file on cloud-1:
+
+        onescp /etc/hosts c<TAB><ENTER>
+
+    SCP file to different path on cloud-1:
+
+        onescp /etc/hosts c<TAB> /root/test
+
 ## TODO:
 
-1. onesync (rsync current folder to specified folder of vm)
-2. oneping (ping VM)
+1. oneping (ping VM)
