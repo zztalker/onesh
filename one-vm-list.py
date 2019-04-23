@@ -10,7 +10,7 @@ import subprocess
 import time
 
 
-ONE_DIR = '~/.one'
+ONE_DIR = os.path.expanduser('~/.one')
 ONE_AUTH = 'one_auth'
 ONE_ENDPOINT = 'endpoint'
 ONE_CACHE = 'cache'
@@ -27,7 +27,7 @@ def get_one_auth_data():
     """
 
     try:
-        with open(os.path.expanduser(ONE_DIR + '/' + ONE_AUTH)) as f:
+        with open(ONE_DIR + '/' + ONE_AUTH) as f:
             one_user, one_password = f.readline().strip().split(":", 1)
     except:
         try:
@@ -37,7 +37,7 @@ def get_one_auth_data():
             sys.exit('You must specify OpenNebula credentials in '
                      '~/.one/one_auth file or in environment variables')
     try:
-        with open(os.path.expanduser(ONE_DIR + '/' + ONE_ENDPOINT)) as f:
+        with open(ONE_DIR + '/' + ONE_ENDPOINT) as f:
             one_endpoint = f.readline().strip()
     except:
         try:
@@ -125,14 +125,18 @@ def run_command(one_vms) -> None:
             pass
     elif args.command[0] == 'scp':
         vm_name = args.command[1]
-        path_to_file = args.command[2]
-        try:
-            path_on_remote = args.command[3]
-        except IndexError:
-            path_on_remote = path_to_file
-        subprocess.call([
-            'scp', path_to_file,
-            'root@{}:{}'.format(one_vms[vm_name], path_on_remote)])
+        path_to_files = args.command[2:-1]
+        if len(args.command) < 4:
+            print("""Need to use at least 3 arguments, for example:
+
+            onescp vm-name myfile /home/user
+
+            Last argument - destination folder on remote.""")
+        else:
+            path_on_remote = args.command[-1]
+            subprocess.call([
+                'scp', path_to_files,
+                'root@{}:{}'.format(one_vms[vm_name], path_on_remote)])
     elif args.command[0] == 'rsync':
         subprocess.call([
             'rsync', '-av', '--chown=root:root', '.',
