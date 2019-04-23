@@ -134,8 +134,9 @@ def run_command(one_vms) -> None:
             Last argument - destination folder on remote.""")
         else:
             path_on_remote = args.command[-1]
+            print("DEBUG:", path_on_remote)
             subprocess.call([
-                'scp', path_to_files,
+                'scp', *path_to_files,
                 'root@{}:{}'.format(one_vms[vm_name], path_on_remote)])
     elif args.command[0] == 'rsync':
         subprocess.call([
